@@ -6,15 +6,20 @@
 
 - JDK: 21
 - IntelliJ에서 실행할 클래스: kr.sesac.wordcounter.Main
-- 작업 디렉터리(`pom.xml`이 있는 폴더): C:\Users\paran\OneDrive\문서\java-word-counter-main
-- 설정 위치와 현재 값: CSV 열 / TSV 열 / HTML 본문 선택자
+- 작업 디렉터리(`pom.xml`이 있는 폴더): 프로젝트 루트(java-word-counter-main)
+- 설정 위치와 현재 값:`Main.java` 상단 상수 
+CSV 열 : CSV_COLUMNS = {"text"} / 
+TSV 열 : TSV_COLUMNS = {"document"}  / 
+HTML 본문 선택자 : HTML_SELECTOR = "#content"
+
+
 
 ## 2. 구현한 기능
 
 | 기능 | 상태(완료·진행 중·미구현) | 확인한 입력과 결과 |
 |---|---|---|
-| TXT 카운팅 | 완료 | `basic.txt` → 9개·6종 ✅ 정답 일치 |
-| CSV·TSV·HTML 처리 | 진행 중  |  |
+| TXT 카운팅 | 완료 |`basic.txt` → 9개·6종 ✅|
+| CSV·TSV·HTML 처리 | 완료 |`basic.csv` → 9개·6종 ✅<br>`basic.tsv` → 9개·6종 ✅<br>`basic.html` → 9개·6종 ✅|
 | 여러 파일 순차 처리 |  |  |
 | 상위 단어·특정 단어 조회 |  |  |
 | 전체 결과 저장 |  |  |
@@ -22,7 +27,7 @@
 
 ## 3. 정확성 확인과 처리 시간
 
-- 작은 기본 샘플의 전체 결과를 정답과 비교한 방법:
+- 작은 기본 샘플의 전체 결과를 정답과 비교한 방법: 콘솔에 출력한 단어별 횟수를 expected/basic-counts.tsv와 대조 (저장 기능 구현 후 Compare Files로 재확인 예정)
 - CSV 따옴표·줄바꿈을 확인한 결과:
 - 일부 파일이 실패했을 때 확인한 결과:
 - 결과 저장 파일 위치:
@@ -58,8 +63,16 @@ CSV의 분석 열은 `text`입니다. 아래 입력은 각각 따로 실행합�
 ## 6. AI 대화 또는 참고 자료
 
 - 웹 대화에서 물어본 개념·힌트·오류 설명:
+단어 분리 정규식(split과 [^허용문자]+), 문자열 비교(equals, isEmpty), Map.merge 동작
+메서드 분리 이유(메뉴 반복 호출, 형식별 읽기와 공통 집계 분리), static final 상수
+Commons CSV·jsoup 사용법, TSV의 setDelimiter·setQuote 설정 이유
+  
 - 도움을 바탕으로 직접 구현한 내용:
+
 - 직접 확인한 입력과 결과:
+basic.txt·csv·tsv·html 모두 9개·6종
+같은 파일을 연속 분석해도 9개 유지(누적 없음)
+
 - 참고 링크:
 
 사용하지 않았다면 사용하지 않았다고 적으면 됩니다.
