@@ -23,6 +23,7 @@ public class Main {
     static long total = 0; //전체 단어 수 셀 변수 추가
 
     static boolean hasResult = false;
+    static boolean hasSummary = false;
     static String lastPath = "";
     static long lastElapsedMs = 0;
     static int tried = 0;      // 시도
@@ -49,12 +50,13 @@ public class Main {
 
                 switch (choice) {
                     case "1" -> {
-                        System.out.print("파일 또는 폴더 경로 > ");
-                        String path = scanner.nextLine();
-                        if (analyze(Path.of(path))) {
-                            System.out.println("분석 완료");
-                            showSummary();
+                        while (true) {
+                            System.out.print("파일 또는 폴더 경로 > ");
+                            String path = scanner.nextLine().trim();
+                            if (analyze(Path.of(path))) break;   // 분석이 시작됐으면 반복 탈출
                         }
+                        System.out.println(hasResult ? "분석 완료" : "분석 실패: 모든 파일을 처리하지 못했습니다.");
+                        showSummary();
                     }
                     case "2" -> {
                         showTop(scanner);
@@ -89,40 +91,39 @@ public class Main {
         }
 
         // ★(2) 대상 파일 목록 만들기
-        List<Path> targets = new ArrayList<>();
-        int skip = 0;
+        List<Path> targets = new ArrayList<>(); //처리할 파일 담을 빈 목록
+        int skip = 0; //이해안감. 지원 안하는 파일 개수를 임시로 세는 변수
         if (Files.isDirectory(input)) {
             try (var stream = Files.list(input)) {
-                for (Path entry : stream.sorted().toList()) {
-                    if (!Files.isRegularFile(entry)) continue;
-                    if (isSupported(entry)) targets.add(entry);
-                    else skip++;
+                for (Path entry : stream.sorted().toList()) { //이름 순 정렬해서 하나씩.
+                    if (!Files.isRegularFile(entry)) continue; //하위 폴더면 건너 뜀
+                    if (isSupported(entry)) targets.add(entry); //지원하는 확장자면 목록에 추가
+                    else skip++; //아니면 건너뜀
                 }
             }
-        } else {
+        } else { //파일 하나를 직접 입력한경우
             if (!isSupported(input)) {
                 System.out.println("지원하지 않는 형식입니다 (.txt .csv .tsv .html .htm): " + input);
                 return false;
             }
-            targets.add(input);
+            targets.add(input); //지원하는 유형 파일이면 목록에 하나 넣음
         }
 
         // ★(3) 지원 파일이 없으면 그만
-        if (targets.isEmpty()) {
+        if (targets.isEmpty()) { //목록 비었으면 중단
             System.out.println("분석할 지원 파일이 없습니다: " + input);
             return false;
         }
 
         // (4) 이제 이전 결과 지우고 시계 켜기
-        freq.clear();
-        total = 0;
-        hasResult = false;
+        freq.clear(); total = 0; hasResult = false; //이전 결과 지우기
+
         tried = 0;
         succeeded = 0;
         failed = 0;
         skipped = skip;   // ★
-        lastPath = input.toString();
-        long start = System.nanoTime();
+        lastPath = input.toString(); //요약용 경로 기억
+        long start = System.nanoTime(); //스톱워치 시작
 
         // ★(5) 파일마다 처리
         for (Path file : targets) {
@@ -137,15 +138,15 @@ public class Main {
         }
 
         // (6) 시계 멈추기
-        lastElapsedMs = (System.nanoTime() - start) / 1_000_000;
-        hasResult = true;
+        lastElapsedMs = (System.nanoTime() - start) / 1000000;
+        hasResult = succeeded > 0;   // 성공한 파일이 있을 때만 조회, 저장 가능
+        hasSummary = true;
         return true;
     }
 
     static Map<String, Long> readOneFile(Path input) throws IOException {
         Map<String, Long> local = new HashMap<>();
         String name = input.getFileName().toString().toLowerCase();
-        // analyze의 else 안에 있는 4갈래 코드(if .txt ~ html 끝)를 여기로 이사
         if (name.endsWith(".txt")) {
             try (BufferedReader reader =
                          Files.newBufferedReader(input, StandardCharsets.UTF_8)) {
@@ -159,11 +160,16 @@ public class Main {
             var format = CSVFormat.RFC4180.builder()
                     .setHeader()
                     .setSkipHeaderRecord(true)
+                    .setTrim(true)
                     .get();
 
             try (var reader = Files.newBufferedReader(input, StandardCharsets.UTF_8);
                  CSVParser parser = format.parse(reader)) {
+                checkHeader(parser, CSV_COLUMNS);
                 for (CSVRecord record : parser) {
+                    if (!record.isConsistent()) {
+                        throw new IOException("셀 수가 헤더와 다릅니다: " + record.getRecordNumber() + "번째 레코드");
+                    }
                     for (String column : CSV_COLUMNS) {
                         countText(record.get(column), local);
                     }
@@ -176,11 +182,16 @@ public class Main {
                     .setSkipHeaderRecord(true)
                     .setDelimiter('\t') //추가
                     .setQuote(null) //추가
+                    .setTrim(true)
                     .get();
 
             try (var reader = Files.newBufferedReader(input, StandardCharsets.UTF_8);
                  CSVParser parser = format.parse(reader)) {
+                checkHeader(parser, TSV_COLUMNS);
                 for (CSVRecord record : parser) {
+                    if (!record.isConsistent()) {
+                        throw new IOException("셀 수가 헤더와 다릅니다: " + record.getRecordNumber() + "번째 레코드");
+                    }
                     for (String column : TSV_COLUMNS) {
                         countText(record.get(column), local);
                     }
@@ -323,13 +334,18 @@ public class Main {
 
     //5 //1
     static void showSummary() {
-        if (!hasResult) {
+        if (!hasSummary) {
             System.out.println("파일 분석을 먼저 해주세요");
             return;
         }
         System.out.println("입력: " + lastPath);
+        System.out.println("파일: 시도 " + tried + "개 / 성공 " + succeeded + "개 / 실패 " + failed + "개 / 지원하지 않아 건너뜀 " + skipped + "개");
         System.out.println("전체 단어 : " + total + "개 / 서로 다른 단어: " + freq.size() + "개");
         System.out.println("처리 시간: " + lastElapsedMs + "ms");
+
+        if (!hasResult) {
+            System.out.println("모든 파일이 실패해 조회·저장할 결과가 없습니다.");
+        }
     }
 
     static void countText(String text, Map<String, Long> target) { //단어 세기 담당
@@ -338,8 +354,6 @@ public class Main {
             if (token.isEmpty()) continue; //빈 문자열이면 건너뛰기
             if (isNumberOnly(token)) continue; //숫자만이면 건너뛰기
             target.merge(token, 1L, Long::sum); //표에 + 1
-
-
         }
     }
 
@@ -351,6 +365,18 @@ public class Main {
             }
         }
         return true;
+    }
+
+    static void checkHeader(CSVParser parser, String[] columns) throws IOException {
+        List<String> headers = parser.getHeaderNames();
+        if (headers.isEmpty()) {
+            throw new IOException("헤더를 읽을 수 없습니다.");
+        }
+        for (String column : columns) {
+            if (!headers.contains(column)) {
+                throw new IOException("분석 열이 없습니다: " + column);
+            }
+        }
     }
 
 
