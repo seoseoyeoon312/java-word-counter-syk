@@ -5,12 +5,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Scanner;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.io.BufferedWriter;
+import java.io.UncheckedIOException;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -21,16 +18,26 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-
 public class Main {
     static HashMap<String, Long> freq = new HashMap<>(); //추가
     static long total = 0; //전체 단어 수 셀 변수 추가
 
     static boolean hasResult = false;
+    static String lastPath = "";
+    static long lastElapsedMs = 0;
+    static int tried = 0;      // 시도
+    static int succeeded = 0;  // 성공
+    static int failed = 0;     // 실패
+    static int skipped = 0;    // 지원하지 않아 건너뜀
 
     static final String[] CSV_COLUMNS = {"text"}; // 표라서 배열 []
     static final String[] TSV_COLUMNS = {"document"}; // 표라서 배열 []
     static final String HTML_SELECTOR = "#content"; // # - id란 뜻
+
+    static boolean isSupported(Path file) {
+        String name = file.getFileName().toString().toLowerCase();
+        return name.endsWith(".txt") || name.endsWith(".csv") || name.endsWith(".tsv") || name.endsWith(".html") || name.endsWith(".htm");
+    }
 
     public static void main(String[] args) throws IOException { //메뉴구성
         try (Scanner scanner = new Scanner(System.in)) {
@@ -44,9 +51,10 @@ public class Main {
                     case "1" -> {
                         System.out.print("파일 또는 폴더 경로 > ");
                         String path = scanner.nextLine();
-                        analyze(Path.of(path));
-                        System.out.println("분석완료");
-                        System.out.println("전체 단어: " + total + "개" + " / " + "서로 다른 단어: " + freq.size() + "개");
+                        if (analyze(Path.of(path))) {
+                            System.out.println("분석 완료");
+                            showSummary();
+                        }
                     }
                     case "2" -> {
                         showTop(scanner);
@@ -61,7 +69,7 @@ public class Main {
                     }
 
                     case "5" -> {
-
+                        showSummary();
                     }
 
                     case "0" -> {
@@ -74,19 +82,77 @@ public class Main {
         }
     }
 
-    static void analyze(Path input) throws IOException { //파일 읽기
-        freq.clear();//새로 분석하기 전에 표 비우기
+    static boolean analyze(Path input) throws IOException { //파일 읽기
+        if (!Files.exists((input))) {
+            System.out.println("경로를 찾을 수 없습니다.: " + input);
+            return false;
+        }
+
+        // ★(2) 대상 파일 목록 만들기
+        List<Path> targets = new ArrayList<>();
+        int skip = 0;
+        if (Files.isDirectory(input)) {
+            try (var stream = Files.list(input)) {
+                for (Path entry : stream.sorted().toList()) {
+                    if (!Files.isRegularFile(entry)) continue;
+                    if (isSupported(entry)) targets.add(entry);
+                    else skip++;
+                }
+            }
+        } else {
+            if (!isSupported(input)) {
+                System.out.println("지원하지 않는 형식입니다 (.txt .csv .tsv .html .htm): " + input);
+                return false;
+            }
+            targets.add(input);
+        }
+
+        // ★(3) 지원 파일이 없으면 그만
+        if (targets.isEmpty()) {
+            System.out.println("분석할 지원 파일이 없습니다: " + input);
+            return false;
+        }
+
+        // (4) 이제 이전 결과 지우고 시계 켜기
+        freq.clear();
         total = 0;
         hasResult = false;
-        String name = input.getFileName().toString().toLowerCase();
+        tried = 0;
+        succeeded = 0;
+        failed = 0;
+        skipped = skip;   // ★
+        lastPath = input.toString();
+        long start = System.nanoTime();
 
+        // ★(5) 파일마다 처리
+        for (Path file : targets) {
+            tried++;
+            try {
+                mergeResult(readOneFile(file));
+                succeeded++;
+            } catch (IOException | UncheckedIOException e) {
+                failed++;
+                System.out.println("실패: " + file + " (" + e.getMessage() + ")");
+            }
+        }
+
+        // (6) 시계 멈추기
+        lastElapsedMs = (System.nanoTime() - start) / 1_000_000;
+        hasResult = true;
+        return true;
+    }
+
+    static Map<String, Long> readOneFile(Path input) throws IOException {
+        Map<String, Long> local = new HashMap<>();
+        String name = input.getFileName().toString().toLowerCase();
+        // analyze의 else 안에 있는 4갈래 코드(if .txt ~ html 끝)를 여기로 이사
         if (name.endsWith(".txt")) {
             try (BufferedReader reader =
                          Files.newBufferedReader(input, StandardCharsets.UTF_8)) {
                 String line;
                 while ((line = reader.readLine()) != null) { //한줄 씩 읽기
 //                System.out.println(line);
-                    countText(line);
+                    countText(line, local);
                 }
             }
         } else if (name.endsWith(".csv")) {
@@ -99,7 +165,7 @@ public class Main {
                  CSVParser parser = format.parse(reader)) {
                 for (CSVRecord record : parser) {
                     for (String column : CSV_COLUMNS) {
-                        countText(record.get(column));
+                        countText(record.get(column), local);
                     }
                 }
             }
@@ -116,7 +182,7 @@ public class Main {
                  CSVParser parser = format.parse(reader)) {
                 for (CSVRecord record : parser) {
                     for (String column : TSV_COLUMNS) {
-                        countText(record.get(column));
+                        countText(record.get(column), local);
                     }
                 }
             }
@@ -129,10 +195,16 @@ public class Main {
             }
             Element content = matches.first();
             content.select("script, style, nav, header, footer").remove();
-            countText(content.text());
+            countText(content.text(), local);
         }
+        return local;
+    }
 
-        hasResult = true;
+    static void mergeResult(Map<String, Long> local) {
+        for (Map.Entry<String, Long> e : local.entrySet()) {
+            freq.merge(e.getKey(), e.getValue(), Long::sum);
+            total += e.getValue();
+        }
     }
 
     private static void printMenu() { //메뉴 출력
@@ -156,8 +228,10 @@ public class Main {
         });
         return list;
     } // freq를 목록으로 복사한 뒤, 횟수 내림차순으로 정렬하고 횟수가 같으면 단어를 compareTo 오름차순으로 정렬해 돌려준다.
-    // 조회(5번)와 저장(7번)이 같은 순서를 써야 해서 메서드로 분리했다.
+// 조회(5번)와 저장(7번)이 같은 순서를 써야 해서 메서드로 분리했다.
 
+
+    //2
     static void showTop(Scanner scanner) {
         if (!hasResult) { //조회·저장 가능 여부를 hasResult 관리. freq가 비었는지로 판단하면 "빈 파일을 정상 처리한 경우(0개·0종)"와 "분석 전·전부 실패"를 구분할 수 없기 때문
             System.out.println("파일 분석을 먼저 해주세요.");
@@ -199,6 +273,8 @@ public class Main {
         return result;
     }
 
+
+    //3
     static void searchWord(Scanner scanner) {
         if (!hasResult) { //조회·저장 가능 여부를 hasResult 관리. freq가 비었는지로 판단하면 "빈 파일을 정상 처리한 경우(0개·0종)"와 "분석 전·전부 실패"를 구분할 수 없기 때문
             System.out.println("파일 분석을 먼저 해주세요.");
@@ -208,7 +284,7 @@ public class Main {
             System.out.print("찾을 단어 > ");
             String word = scanner.nextLine().trim();
             List<String> tokens = toTokens(word);
-            if(tokens.size() != 1) {
+            if (tokens.size() != 1) {
                 System.out.println("단어 하나를 입력하세요.");
                 continue;
             }
@@ -219,6 +295,7 @@ public class Main {
         }
     }
 
+    //4
     static void saveResult() {
         if (!hasResult) {
             System.out.println("파일 분석을 먼저 해주세요.");
@@ -244,15 +321,28 @@ public class Main {
         }
     }
 
-    static void countText(String text) { //단어 세기 담당
+    //5 //1
+    static void showSummary() {
+        if (!hasResult) {
+            System.out.println("파일 분석을 먼저 해주세요");
+            return;
+        }
+        System.out.println("입력: " + lastPath);
+        System.out.println("전체 단어 : " + total + "개 / 서로 다른 단어: " + freq.size() + "개");
+        System.out.println("처리 시간: " + lastElapsedMs + "ms");
+    }
+
+    static void countText(String text, Map<String, Long> target) { //단어 세기 담당
         String[] tokens = text.toLowerCase().split("[^A-Za-z0-9가-힣ㄱ-ㅎㅏ-ㅣ]+"); //추가
         for (String token : tokens) { //추가
             if (token.isEmpty()) continue; //빈 문자열이면 건너뛰기
             if (isNumberOnly(token)) continue; //숫자만이면 건너뛰기
-            freq.merge(token, 1L, Long::sum); //표에 + 1
-            total = total + 1; // 전체 수 +1
+            target.merge(token, 1L, Long::sum); //표에 + 1
+
+
         }
     }
+
     static boolean isNumberOnly(String word) { //숫자만 있는지 판별 담당, 공통 사용
         for (int i = 0; i < word.length(); i++) {
             char c = word.charAt(i);

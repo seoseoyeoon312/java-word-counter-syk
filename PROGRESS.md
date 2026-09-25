@@ -20,17 +20,17 @@ HTML 본문 선택자 : HTML_SELECTOR = "#content"
 |---|---|---|
 | TXT 카운팅 | 완료 |`basic.txt` → 9개·6종 ✅|
 | CSV·TSV·HTML 처리 | 완료 |`basic.csv` → 9개·6종 ✅<br>`basic.tsv` → 9개·6종 ✅<br>`basic.html` → 9개·6종 ✅|
-| 여러 파일 순차 처리 |  |  |
-| 상위 단어·특정 단어 조회 |  |  |
-| 전체 결과 저장 |  |  |
-| 잘못된 입력·실패 파일·빈 파일 처리 |  |  |
+| 여러 파일 순차 처리 | 미구현 |  |
+| 상위 단어·특정 단어 조회 | 완료 | N=2 → 2개 / N=999·빈 입력 → 있는 6개만 ✅<br>`abc`·`0`·`-1` → 안내 후 재입력 ✅<br>`JAVA!` → java : 3회, `없는단어` → 0회 ✅<br>`java 자바`·`123` → 단어 하나 입력 안내 ✅|
+| 전체 결과 저장 | 완료 |`out/counts.tsv` 저장 → `expected/basic-counts.tsv`와 일치 ✅|
+| 잘못된 입력·실패 파일·빈 파일 처리 | 진행 중 |  |
 
 ## 3. 정확성 확인과 처리 시간
 
-- 작은 기본 샘플의 전체 결과를 정답과 비교한 방법: 콘솔에 출력한 단어별 횟수를 expected/basic-counts.tsv와 대조 (저장 기능 구현 후 Compare Files로 재확인 예정)
+- 작은 기본 샘플의 전체 결과를 정답과 비교한 방법: out/counts.tsv와 expected/basic-counts.tsv를 IntelliJ Compare Files로 비교 → 단어·횟수·정렬 순서 모두 일치(줄 구분자 차이만, 요구사항에서 허용)
 - CSV 따옴표·줄바꿈을 확인한 결과:
 - 일부 파일이 실패했을 때 확인한 결과:
-- 결과 저장 파일 위치:
+- 결과 저장 파일 위치: out/counts.tsv (UTF-8, 탭 구분)
 
 CSV의 분석 열은 `text`입니다. 아래 입력은 각각 따로 실행합니다. 정답은 [필수 요구사항의 큰 데이터 처리](docs/requirements.md#10-큰-데이터-처리)를 참고하세요.
 
@@ -62,18 +62,27 @@ CSV의 분석 열은 `text`입니다. 아래 입력은 각각 따로 실행합�
 
 ## 6. AI 대화 또는 참고 자료
 
-- 웹 대화에서 물어본 개념·힌트·오류 설명:
-단어 분리 정규식(split과 [^허용문자]+), 문자열 비교(equals, isEmpty), Map.merge 동작
-메서드 분리 이유(메뉴 반복 호출, 형식별 읽기와 공통 집계 분리), static final 상수
-Commons CSV·jsoup 사용법, TSV의 setDelimiter·setQuote 설정 이유
+### 웹 대화에서 물어본 개념·힌트·오류 설명:
+- 단어 분리 정규식, 문자열 비교(equals·isEmpty), Map.merge 동작
+- char 비교와 인덱스 범위(0 ~ length-1), 향상된 for문
+- 메서드 분리 이유(메뉴 반복 호출, 형식별 읽기와 공통 집계 분리), static final 상수
+- Commons CSV·jsoup 사용법, TSV의 setDelimiter·setQuote 설정 이유
+- switch 화살표 문법과 fall-through, Scanner 입력, try-catch(NumberFormatException)
+- Map.Entry와 List 정렬(Comparator), Files.newBufferedWriter로 UTF-8 저장
+- 예외 메시지(InvalidPathException) 읽는 법
   
-- 도움을 바탕으로 직접 구현한 내용:
+### 도움을 바탕으로 직접 구현한 내용:
+- 단어 분리·집계(countText), 숫자 토큰 판별(isNumberOnly), 조회용 토큰 추출(toTokens)
+- 확장자별 분기와 형식별 읽기(개발 가이드 예제를 입력 경로·설정 상수·countText 호출로 수정)
+- 콘솔 메뉴 6개, 상위 N개 조회, 특정 단어 조회, 전체 결과 저장, 요약·처리 시간
 
-- 직접 확인한 입력과 결과:
-basic.txt·csv·tsv·html 모두 9개·6종
-같은 파일을 연속 분석해도 9개 유지(누적 없음)
+### 직접 확인한 입력과 결과:
+- basic.txt·csv·tsv·html 모두 9개·6종, 같은 파일 연속 분석 시 누적 없음
+- out/counts.tsv와 expected/basic-counts.tsv Compare Files 일치
+- 메뉴 확인 표(N=2·999·빈 입력·abc·0·-1, JAVA!·없는단어·java 자바·123) 전부 정답대로 동작
 
-- 참고 링크:
+### 참고 링크: 
+- 과제 저장소의 개발 가이드(docs/guide.md) CSV·HTML 읽기 예제
 
 사용하지 않았다면 사용하지 않았다고 적으면 됩니다.
 
