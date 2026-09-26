@@ -22,18 +22,14 @@ public class Main {
     static HashMap<String, Long> freq = new HashMap<>(); //추가
     static long total = 0; //전체 단어 수 셀 변수 추가
 
-    static boolean hasResult = false;
-    static boolean hasSummary = false;
+    static boolean hasResult,  hasSummary = false;
     static String lastPath = "";
     static long lastElapsedMs = 0;
-    static int tried = 0;      // 시도
-    static int succeeded = 0;  // 성공
-    static int failed = 0;     // 실패
-    static int skipped = 0;    // 지원하지 않아 건너뜀
+    static int tried, succeeded, failed, skipped = 0;
 
-    static final String[] CSV_COLUMNS = {"text"}; // 표라서 배열 []
-    static final String[] TSV_COLUMNS = {"document"}; // 표라서 배열 []
-    static final String HTML_SELECTOR = "#content"; // # - id란 뜻
+    static final String[] CSV_COLUMNS = {"text"}; // text열만 세라
+    static final String[] TSV_COLUMNS = {"document"}; // doc열만 세라
+    static final String HTML_SELECTOR = "#content"; // id가 content인 영역만 세라
 
     static boolean isSupported(Path file) {
         String name = file.getFileName().toString().toLowerCase();
@@ -46,14 +42,18 @@ public class Main {
             while (running) {
                 printMenu();
                 System.out.print("선택 > ");
-                String choice = scanner.nextLine();
+                String choice = scanner.nextLine(); //nextLine -> 엔터로 실행 가능
 
                 switch (choice) {
                     case "1" -> {
                         while (true) {
                             System.out.print("파일 또는 폴더 경로 > ");
                             String path = scanner.nextLine().trim();
-                            if (analyze(Path.of(path))) break;   // 분석이 시작됐으면 반복 탈출
+                            try {
+                                if (analyze(Path.of(path))) break;
+                            } catch (java.nio.file.InvalidPathException e) {
+                                System.out.println("잘못된 경로입니다: " + path);
+                            }
                         }
                         System.out.println(hasResult ? "분석 완료" : "분석 실패: 모든 파일을 처리하지 못했습니다.");
                         showSummary();
@@ -115,16 +115,12 @@ public class Main {
             return false;
         }
 
-        // (4) 이제 이전 결과 지우고 시계 켜기
+        // (4) 초기화 및 시계 켜기
         freq.clear(); total = 0; hasResult = false; //이전 결과 지우기
-
-        tried = 0;
-        succeeded = 0;
-        failed = 0;
+        tried = 0; succeeded = 0; failed = 0;
         skipped = skip;   // ★
         lastPath = input.toString(); //요약용 경로 기억
         long start = System.nanoTime(); //스톱워치 시작
-
         // ★(5) 파일마다 처리
         for (Path file : targets) {
             tried++;
@@ -136,7 +132,6 @@ public class Main {
                 System.out.println("실패: " + file + " (" + e.getMessage() + ")");
             }
         }
-
         // (6) 시계 멈추기
         lastElapsedMs = (System.nanoTime() - start) / 1000000;
         hasResult = succeeded > 0;   // 성공한 파일이 있을 때만 조회, 저장 가능
@@ -245,7 +240,7 @@ public class Main {
     //2
     static void showTop(Scanner scanner) {
         if (!hasResult) { //조회·저장 가능 여부를 hasResult 관리. freq가 비었는지로 판단하면 "빈 파일을 정상 처리한 경우(0개·0종)"와 "분석 전·전부 실패"를 구분할 수 없기 때문
-            System.out.println("파일 분석을 먼저 해주세요.");
+            System.out.println("조회 및 저장할 분석 결과가 없습니다.");
             return;
         }
         int n;
@@ -284,11 +279,10 @@ public class Main {
         return result;
     }
 
-
     //3
     static void searchWord(Scanner scanner) {
         if (!hasResult) { //조회·저장 가능 여부를 hasResult 관리. freq가 비었는지로 판단하면 "빈 파일을 정상 처리한 경우(0개·0종)"와 "분석 전·전부 실패"를 구분할 수 없기 때문
-            System.out.println("파일 분석을 먼저 해주세요.");
+            System.out.println("조회 및 저장할 분석 결과가 없습니다.");
             return;
         }
         while (true) {
@@ -309,7 +303,7 @@ public class Main {
     //4
     static void saveResult() {
         if (!hasResult) {
-            System.out.println("파일 분석을 먼저 해주세요.");
+            System.out.println("조회 및 저장할 분석 결과가 없습니다.");
             return;
         }
 
@@ -328,7 +322,7 @@ public class Main {
             }
             System.out.println("전체 결과 " + list.size() + "개 단어를 " + out + "에 저장했습니다.");
         } catch (IOException e) {
-            System.out.println("저장에 실패했습니다: " + e.getMessage());
+            System.out.println("저장에 실패했습니다: " + out + " (" + e.getClass().getSimpleName() + ")");
         }
     }
 

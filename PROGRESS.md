@@ -23,7 +23,7 @@ HTML 본문 선택자 : HTML_SELECTOR = "#content"
 | 여러 파일 순차 처리 | 완료 |`samples/equivalent` 폴더 → 시도 4·성공 4, 36개·6종 ✅|
 | 상위 단어·특정 단어 조회 | 완료 | N=2 → 2개 / N=999·빈 입력 → 있는 6개만 ✅<br>`abc`·`0`·`-1` → 안내 후 재입력 ✅<br>`JAVA!` → java : 3회, `없는단어` → 0회 ✅<br>`java 자바`·`123` → 단어 하나 입력 안내 ✅|
 | 전체 결과 저장 | 완료 |`out/counts.tsv` 저장 → `expected/basic-counts.tsv`와 일치 ✅|
-| 잘못된 입력·실패 파일·빈 파일 처리 | 진행 중 |  |
+| 잘못된 입력·실패 파일·빈 파일 처리 | 완료 |없는 경로·미지원 파일·지원 파일 없음 → 안내 후 재입력 ✅<br>invalid 4개 각각 실패 ✅, invalid 폴더 → 요약만 가능·조회·저장 차단 ✅<br>부분 성공(error-demo) → 시도2·성공1·실패1, 결과 basic-counts.tsv와 일치 ✅<br>memo.bin 추가 → 건너뜀 1 ✅<br>빈 파일 3종 → 0개·0종 정상 ✅<br>저장 실패 → 안내 후 조회 계속 ✅|
 
 ## 3. 정확성 확인과 처리 시간
 
@@ -32,15 +32,16 @@ HTML 본문 선택자 : HTML_SELECTOR = "#content"
 - 일부 파일이 실패했을 때 확인한 결과:
 - 결과 저장 파일 위치: out/counts.tsv (UTF-8, 탭 구분)
 - 일부 파일이 실패했을 때 확인한 결과: samples/invalid의 4개 파일을 각각 분석 → 모두 시도 1·성공 0·실패 1, 실패 안내에 파일 경로와 이유 출력 (부분 성공 실험은 진행 예정)
+- 일부 파일이 실패했을 때 확인한 결과: data/local/error-demo(basic.txt + broken-quote.csv) → 시도 2·성공 1·실패 1, 저장 결과가 expected/basic-counts.tsv와 일치(줄 구분자 차이만). 실패 파일의 앞부분 단어가 합계에 섞이지 않음 확인
 
 CSV의 분석 열은 `text`입니다. 아래 입력은 각각 따로 실행합니다. 정답은 [필수 요구사항의 큰 데이터 처리](docs/requirements.md#10-큰-데이터-처리)를 참고하세요.
 
 | 입력 | 데이터 건수 / 파일 수 | 전체 단어 수 | 종류 수 | 처리 시간 | 완료·오류 |
 |---|---|---|---|---|---|
-| `data/klue-ynat/news-1000.csv` | 1,000 / 1 |  |  |  |  |
-| `data/klue-ynat/news-10000.csv` | 10,000 / 1 |  |  |  |  |
-| `data/klue-ynat/news-full.csv` | 45,678 / 1 |  |  |  |  |
-| `data/klue-ynat/many` | 45,678 / 16, 순차 처리 |  |  |  |  |
+| `data/klue-ynat/news-1000.csv` | 1,000 / 1 | 6,991 | 5,052 | 10ms | 완료 |
+| `data/klue-ynat/news-10000.csv` | 10,000 / 1 | 70,374 | 28,871 | 139ms | 완료 |
+| `data/klue-ynat/news-full.csv` | 45,678 / 1 | 321,084 | 78,309 | 161ms | 완료  |
+| `data/klue-ynat/many` | 45,678 / 16, 순차 처리 | 321,084 | 78,309 | 369ms | 완료 |
 
 - 전체 파일 하나와 16개 파일의 **모든 단어별 횟수**를 비교한 방법과 결과:
 
