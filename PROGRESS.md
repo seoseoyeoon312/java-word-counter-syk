@@ -180,6 +180,7 @@ Main (메뉴, 입력 검사, 분석 흐름, 집계, 결과 출력)
 - Gson: https://github.com/google/gson (User Guide)
 - https://www.baeldung.com/java-word-counting
 - 추가 기입 예정
+
 사용하지 않았다면 사용하지 않았다고 적으면 됩니다.
 
 ## 7. 발표할 내용
