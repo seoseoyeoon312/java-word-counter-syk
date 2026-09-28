@@ -143,9 +143,8 @@ Main (메뉴, 입력 검사, 분석 흐름, 집계, 결과 출력)
 | 저장 결과 Compare Files | `basic-counts.tsv`와 같음 | `basic-counts.tsv`와 같음 (No differences) | ✅ |
 
 **남은 개선**
-- 집계(`freq`, `mergeResult`, `sortedEntries`)와 분석 흐름(`analyze`, `readOneFile`)은 아직 `Main`에 있다.
-- 따로 클래스로 나누면 `Main`은 메뉴만 맡게 됨
-
+- 집계(`freq`, `mergeResult`, `sortedEntries`)와 분석 흐름(`analyze`, `readOneFile`)은 Main에 남아 있음 
+- 
 ## 6. AI 대화 또는 참고 자료
 
 ### 웹 대화에서 물어본 개념,힌트,오류 설명:
@@ -155,7 +154,7 @@ Main (메뉴, 입력 검사, 분석 흐름, 집계, 결과 출력)
 - Commons CSV-jsoup 사용법, TSV의 setDelimiter-setQuote 설정 이유
 - fall-through, Scanner 입력, try-catch(NumberFormatException)
 - Files.newBufferedWriter로 UTF-8 저장
-- (심화 8) 클래스를 나누는 순서(파서 → 등록부 → 단어 규칙,저장)
+- (심화 8) 클래스를 나누는 순서(파서 → 등록표 → 단어 규칙,저장)
 - (심화 8) 컴파일 오류 원인: 인터페이스를 클래스로 만든 경우, 메서드를 닫는 괄호 위치, IntelliJ가 만든 RuntimeException 감싸기가 실패 처리를 우회하는 문제
 - (심화 8) `ExceptionInInitializerError`와 스택 트레이스의 `Caused by` 읽는 법 (등록표 `Map.of` 키 중복)
 - (심화 6) Gson 선택과 JSON 트리 읽는 법(`fromJson`, `getAsJsonArray`, `get`) 설명
@@ -177,9 +176,10 @@ Main (메뉴, 입력 검사, 분석 흐름, 집계, 결과 출력)
 - 구조를 바꾸기 전과 후 결과가 같음, JSON 추가 후에도 기존 형식 결과 그대로
 
 ### 참고 링크:
-- 과제 저장소의 개발 가이드(docs/guide.md)
+- 과제 저장소의 개발 가이드 (docs/guide.md)
 - Gson: https://github.com/google/gson (User Guide)
 - https://www.baeldung.com/java-word-counting
+- 추가 기입 예정
 
 사용하지 않았다면 사용하지 않았다고 적으면 됩니다.
 
