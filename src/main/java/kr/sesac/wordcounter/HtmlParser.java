@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class HtmlParser implements TextParser {
-    static final String SELECTOR = "#content";   // 본문 영역 (설정)
+    static final String SELECTOR = "#content";   //본문 영역 (설정)
 
     @Override
     public List<String> parse(Path file) throws IOException {

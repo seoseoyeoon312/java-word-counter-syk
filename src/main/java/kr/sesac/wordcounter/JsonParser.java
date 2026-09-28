@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
     public class JsonParser implements TextParser {
-        static final String[] FIELDS = {"text"};   // 분석할 필드 (설정)
+        static final String[] FIELDS = {"text"};   //분석할 필드 (설정)
 
         @Override
         public List<String> parse(Path file) throws IOException {

@@ -15,7 +15,7 @@ public class TxtParser implements TextParser {
         try (BufferedReader reader =
                      Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
             String line;
-            while ((line = reader.readLine()) != null) { //한줄 씩 읽기
+            while ((line = reader.readLine()) != null) {
                 texts.add(line);
             }
         }
