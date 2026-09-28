@@ -27,7 +27,7 @@ public class TsvParser implements TextParser {
 
         try (var reader = Files.newBufferedReader(file, StandardCharsets.UTF_8);
              CSVParser parser = format.parse(reader)) {
-            CsvParser.checkHeader(parser, COLUMNS); //Csvparser checkheader 빌려서 사용!
+            CsvParser.checkHeader(parser, COLUMNS);
             for (CSVRecord record : parser) {
                 if (!record.isConsistent()) {
                     throw new IOException("셀 수가 헤더와 다릅니다: " + record.getRecordNumber() + "번째 레코드");

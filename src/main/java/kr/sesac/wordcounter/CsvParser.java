@@ -21,7 +21,8 @@ public class CsvParser implements TextParser {
                 .setHeader()
                 .setSkipHeaderRecord(true)
                 .setTrim(true)
-                .get(); //메서드 체이닝.. get에서 최종 완성
+                .get();
+        //메서드 체이닝.. get에서 최종 완성
 
         try (var reader = Files.newBufferedReader(file, StandardCharsets.UTF_8);
              CSVParser parser = format.parse(reader)) //상단 읽기 규칙 format 적용
