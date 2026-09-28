@@ -8,9 +8,9 @@
 - IntelliJ에서 실행할 클래스: kr.sesac.wordcounter.Main
 - 작업 디렉터리(`pom.xml`이 있는 폴더): 프로젝트 루트 (java-word-counter-main)
 - 설정 위치와 현재 값:(심화 8 구조 개선 후 각 파서 클래스 상단 상수로 이동)
-  - CSV 열 : `CsvParser.COLUMNS = {"text"}`
-  - TSV 열 : `TsvParser.COLUMNS = {"document"}`
-  - HTML 본문 선택자 : `HtmlParser.SELECTOR = "#content"`
+  - CSV 열: `CsvParser.COLUMNS = {"text"}`
+  - TSV 열: `TsvParser.COLUMNS = {"document"}`
+  - HTML 본문 선택자: `HtmlParser.SELECTOR = "#content"`
   - JSON 분석 필드(심화 6): `JsonParser.FIELDS = {"text"}`
 - 추가 라이브러리(심화 6): Gson 2.11.0 (pom.xml)
 
@@ -144,7 +144,7 @@ Main (메뉴, 입력 검사, 분석 흐름, 집계, 결과 출력)
 
 **남은 개선**
 - 집계(`freq`, `mergeResult`, `sortedEntries`)와 분석 흐름(`analyze`, `readOneFile`)은 Main에 남아 있음 
-- 
+
 ## 6. AI 대화 또는 참고 자료
 
 ### 웹 대화에서 물어본 개념,힌트,오류 설명:
@@ -180,7 +180,6 @@ Main (메뉴, 입력 검사, 분석 흐름, 집계, 결과 출력)
 - Gson: https://github.com/google/gson (User Guide)
 - https://www.baeldung.com/java-word-counting
 - 추가 기입 예정
-
 사용하지 않았다면 사용하지 않았다고 적으면 됩니다.
 
 ## 7. 발표할 내용
