@@ -105,7 +105,7 @@ Main (메뉴, 입력 검사, 분석 흐름, 집계, 결과 출력)
 
 | 클래스 | 역할 |
 |---|---|
-| `TextParser` | 파서 인터페이스, "파일을 받아 텍스트 조각 목록을 돌려준다"는 `parse` 메서드 하나만 있음 |
+| `TextParser` | 파서 인터페이스 |
 | `TxtParser` | TXT를 한 줄씩 읽어서 돌려줌 |
 | `CsvParser` | CSV의 `text` 열 값을 돌려줌, 헤더와 분석 열 검사(`checkHeader`), 셀 수 검사도 여기서 함 |
 | `TsvParser` | TSV(탭 구분, 따옴표 없음)의 `document` 열 값을 돌려줌, 헤더 검사는 `CsvParser.checkHeader` 사용 |
@@ -166,7 +166,6 @@ Main (메뉴, 입력 검사, 분석 흐름, 집계, 결과 출력)
 - 단어 분리와 집계(countText), 숫자만 있는 단어 판별(isNumberOnly), 조회용 단어 추출(toTokens)
 - 확장자별 분기와 형식별 읽기 (개발 가이드 예제를 입력 경로, 설정 상수, countText 호출에 맞게 수정)
 - 콘솔 메뉴 6개, 상위 N개 조회, 특정 단어 조회, 전체 결과 저장, 요약과 처리 시간
-- (심화 6) 확인용 샘플(basic.json, broken.json)로 결과 확인
 
 ### 직접 확인한 입력과 결과:
 - basic.txt, csv, tsv, html 모두 9개-6종
@@ -176,11 +175,13 @@ Main (메뉴, 입력 검사, 분석 흐름, 집계, 결과 출력)
 - basic.json 9개, 6종 (broken.json은 실패로 세고 계속 동작)
 - 구조를 바꾸기 전과 후 결과가 같음, JSON 추가 후에도 기존 형식 결과 그대로
 
-### 참고 링크:
+
+### 참고 링크: 
 - 과제 저장소의 개발 가이드 (docs/guide.md)
 - Gson: https://github.com/google/gson (User Guide)
 - https://www.baeldung.com/java-word-counting
-- 추가 기입 예정
+
+추가 기입 예정
 
 사용하지 않았다면 사용하지 않았다고 적으면 됩니다.
 
