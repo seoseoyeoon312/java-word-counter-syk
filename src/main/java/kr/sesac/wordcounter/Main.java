@@ -57,9 +57,9 @@ public class Main {
             System.out.println("경로를 찾을 수 없습니다.: " + input);
             return false;
         }
-        // ★(2) 대상 파일 목록 만들기
+
         List<Path> targets = new ArrayList<>();
-        int skip = 0; // 지원하지 않는 파일 개수
+        int skip = 0; //지원하지 않는 파일 개수
         if (Files.isDirectory(input)) {
             try (var stream = Files.list(input)) {
                 for (Path entry : stream.sorted().toList()) {
@@ -75,23 +75,17 @@ public class Main {
             }
             targets.add(input); //지원하는 유형 파일이면 목록에 하나 넣음
         }
-        // ★(3) 지원 파일이 없으면 그만
+
         if (targets.isEmpty()) { //목록 비었으면 중단
             System.out.println("분석할 지원 파일이 없습니다: " + input);
             return false;
         }
 
-        // (4) 초기화 및 시계 켜기
-        freq.clear();
-        total = 0;
-        hasResult = false; //이전 결과 지우기
-        tried = 0;
-        succeeded = 0;
-        failed = 0;
-        skipped = skip;   // ★
-        lastPath = input.toString(); //요약용 경로 기억
+        //시계 시작
+        freq.clear(); total = 0; hasResult = false; tried = 0; succeeded = 0; failed = 0; skipped = skip;
+        lastPath = input.toString();
         long start = System.nanoTime(); //스톱워치 시작
-        // ★(5) 파일마다 처리
+
         for (
                 Path file : targets) {
             tried++;
@@ -103,9 +97,9 @@ public class Main {
                 System.out.println("실패: " + file + " (" + e.getMessage() + ")");
             }
         }
-        // (6) 시계 멈추기
+
         lastElapsedMs = (System.nanoTime() - start) / 1000000;
-        hasResult = succeeded > 0;   // 성공한 파일이 있을 때만 조회, 저장 가능
+        hasResult = succeeded > 0;
         hasSummary = true;
         return true;
     }
@@ -146,13 +140,10 @@ public class Main {
             return a.getKey().compareTo(b.getKey());
         });
         return list;
-    } // freq를 목록으로 복사한 뒤, 횟수 내림차순으로 정렬하고 횟수가 같으면 단어를 compareTo 오름차순으로 정렬해 돌려준다.
-// 조회(5번)와 저장(7번)이 같은 순서를 써야 해서 메서드로 분리했다.
+    }
 
-
-    //2
     static void showTop(Scanner scanner) {
-        if (!hasResult) { //조회·저장 가능 여부를 hasResult 관리. freq가 비었는지로 판단하면 "빈 파일을 정상 처리한 경우(0개·0종)"와 "분석 전·전부 실패"를 구분할 수 없기 때문
+        if (!hasResult) {
             System.out.println("조회 및 저장할 분석 결과가 없습니다.");
             return;
         }
@@ -181,9 +172,8 @@ public class Main {
         }
     }
 
-    //3
     static void searchWord(Scanner scanner) {
-        if (!hasResult) { //조회·저장 가능 여부를 hasResult 관리. freq가 비었는지로 판단하면 "빈 파일을 정상 처리한 경우(0개·0종)"와 "분석 전·전부 실패"를 구분할 수 없기 때문
+        if (!hasResult) {
             System.out.println("조회 및 저장할 분석 결과가 없습니다.");
             return;
         }
@@ -202,7 +192,6 @@ public class Main {
         }
     }
 
-    //4
     static void saveResult() {
         if (!hasResult) {
             System.out.println("조회 및 저장할 분석 결과가 없습니다.");
@@ -219,7 +208,6 @@ public class Main {
         }
     }
 
-    //5 //1
     static void showSummary() {
         if (!hasSummary) {
             System.out.println("파일 분석을 먼저 해주세요");
