@@ -158,6 +158,7 @@ Main (메뉴, 입력 검사, 분석 흐름, 집계, 결과 출력)
 - (심화 8) 컴파일 오류 원인: 인터페이스를 클래스로 만든 경우, 메서드를 닫는 괄호 위치, IntelliJ가 만든 RuntimeException 감싸기가 실패 처리를 우회하는 문제
 - (심화 8) `ExceptionInInitializerError`와 스택 트레이스의 `Caused by` 읽는 법 (등록표 `Map.of` 키 중복)
 - (심화 6) Gson 선택과 JSON 트리 읽는 법(`fromJson`, `getAsJsonArray`, `get`) 설명
+- (심화 6, 8) JsonParser 작성과 파서 클래스 분리는 막힌 부분에서 한 줄씩 설명을 듣고 이해한 뒤 옮겨 넣고 직접 실행해서 결과 확인 (확인용 샘플 basic.json, broken.json은 직접 작성)
 - 처리 시간이 데이터 크기에 비례하지 않은 이유 (프로그램을 켜고 처음 돌린 분석이 느리게 나옴)
 - git 커밋 경고(CRLF → LF)의 의미
 
