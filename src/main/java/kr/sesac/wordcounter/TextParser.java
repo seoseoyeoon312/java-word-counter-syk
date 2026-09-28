@@ -6,4 +6,4 @@ import java.util.List;
 
 public interface TextParser {
     List<String> parse(Path file) throws IOException;
-}
+} //text
