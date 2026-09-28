@@ -179,6 +179,7 @@ Main (메뉴, 입력 검사, 분석 흐름, 집계, 결과 출력)
 ### 참고 링크:
 - 과제 저장소의 개발 가이드(docs/guide.md)
 - Gson: https://github.com/google/gson (User Guide)
+- https://www.baeldung.com/java-word-counting
 
 사용하지 않았다면 사용하지 않았다고 적으면 됩니다.
 
