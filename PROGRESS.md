@@ -28,7 +28,7 @@
 ## 3. 정확성 확인과 처리 시간
 
 - 작은 기본 샘플의 전체 결과를 정답과 비교한 방법: `out/counts.tsv`와 `expected/basic-counts.tsv`를 Compare Files로 비교 → 단어, 횟수, 정렬 순서 모두 일치 (줄바꿈 문자만 차이)
-- CSV 따옴표·줄바꿈을 확인한 결과: `samples/edge/quoted-lines.csv` → 5개, 3종 ✅ (따옴표 안의 쉼표와 줄바꿈을 셀 하나로 인식)
+- CSV 따옴표와 줄바꿈을 확인한 결과: `samples/edge/quoted-lines.csv` → 5개, 3종 ✅ (따옴표 안의 쉼표와 줄바꿈을 셀 하나로 인식)
 - 결과 저장 파일 위치: `out/counts.tsv` (UTF-8, 탭 구분)
 - 일부 파일이 실패했을 때 확인한 결과:
 
@@ -56,7 +56,7 @@ CSV의 분석 열은 `text`입니다. 아래 입력은 각각 따로 실행합�
 | | news-10000 | 39 | 63 | 34 |
 
 - 확인한 것: 실행 순서와 관계없이 프로그램 실행 후 첫 분석이 가장 느림, 두 번째 이후에는 news-10000 약 40ms, news-full 약 200ms로 데이터 크기에 비례
-- 추정: 첫 분석이 느린 이유는 자바가 처음 실행하는 코드를 준비하는 시간(클래스 로딩, 실행 중 최적화)으로 추정. (claude 참고)
+- 추정: 첫 분석이 느린 이유는 자바가 처음 실행하는 코드를 준비하는 시간(클래스 로딩, 실행 중 최적화)으로 추정 (claude 참고)
 
 ## 4. 구현 중 해결한 문제
 
@@ -140,10 +140,10 @@ Main (메뉴, 입력 검사, 분석 흐름, 집계, 결과 출력)
 | `Main` | 콘솔 메뉴, 입력 검사, 분석 흐름(파일 목록 만들기, 파일별로 따로 세기, 성공한 것만 합치기, 시간 재기), 정렬, 결과 출력 |
 
 **클래스 구분 이유**
-- 파서를 인터페이스 하나로 묶어서, Main이 파일 형식을 몰라도 `parse` 하나로 모든 파일을 읽도록 구성
-- 확장자와 파서 연결을 `Parsers` 한 곳에 모아서, 새 형식을 추가할 때 고칠 곳을 한 군데로 제한
+- 파서를 인터페이스를 묶어서 Main이 파일 형식을 몰라도 `parse` 하나로 모든 파일을 읽도록 구성
+- 확장자와 파서 연결을 `Parsers` 한 곳에 모아서 새 형식을 추가할 때 고칠 곳을 한 군데로 제한
 - 분석과 단어 조회가 같은 규칙을 쓰도록 단어 규칙을 `WordRules`로 분리 (`JAVA!`로 조회해도 `java`를 검색)
-- 구조를 바꿔도 실패 처리 규칙이 깨지지 않도록, 파일마다 따로 세고 성공한 것만 합치는 흐름은 그대로 유지
+- 구조를 바꿔도 실패 처리 규칙이 깨지지 않도록 파일마다 따로 세고 성공한 것만 합치는 흐름은 그대로 유지
 
 **새 형식을 추가할 때 바꾸는 곳**
 1. `TextParser`를 구현한 파서 클래스 1개 추가
@@ -204,14 +204,16 @@ Main (메뉴, 입력 검사, 분석 흐름, 집계, 결과 출력)
 - 구조를 바꾸기 전과 후 결과가 같음, JSON 추가 후에도 기존 형식 결과 그대로
 - 처리 시간은 실행 순서를 바꿔 같은 입력을 3번씩 측정
 
-### 참고 링크: 
-- 과제 저장소의 개발 가이드 (docs/guide.md)
-- Gson: https://github.com/google/gson (User Guide)
-- https://www.baeldung.com/java-word-counting
-
-추가 기입 예정
-
-사용하지 않았다면 사용하지 않았다고 적으면 됩니다.
+### 참고 링크:
+- 과제 저장소의 개발 가이드 (docs/guide.md), 심화 요구사항 (docs/advanced.md) 6번, 8번
+- Apache Commons CSV: https://commons.apache.org/proper/commons-csv/
+- jsoup Cookbook: https://jsoup.org/cookbook/
+- Gson User Guide: https://github.com/google/gson/blob/main/UserGuide.md
+- Baeldung, Counting Words in a String with Java: https://www.baeldung.com/java-word-counting
+- Baeldung, Checked and Unchecked Exceptions in Java: https://www.baeldung.com/java-checked-unchecked-exceptions
 
 ## 7. 발표할 내용
-- 진행 중
+- 구현한 기능과 전체 처리 흐름: 경로 검사 → 확장자에 맞는 파서 선택 → 형식별 텍스트 추출 → 파일별 임시 Map에 집계 → 성공한 파일만 전체 결과에 합산 → 요약, 조회, 저장
+- 분석 → 조회 → 저장 시연: basic.txt 분석 → 상위 2개 (java 3회, 자료구조 2회) → `JAVA!` 조회 (java 3회) → 저장 후 `expected/basic-counts.tsv`와 Compare Files
+- 해결한 문제 또는 성능 실험에서 알게 된 점: 실패한 파일은 버리고 성공한 파일만 합치는 실패 처리, IntelliJ 자동 수정이 IOException을 RuntimeException으로 감싸 실패 처리가 우회된 문제와 수정 전후 예외가 잡히는 위치
+- 남은 문제와 더 개선하고 싶은 부분: 분석 상태와 집계 흐름을 Main 밖 객체로 분리, 읽으면서 바로 집계해 메모리 사용 줄이기, CSV 오류 메시지 한글화, 심화 7(DB 저장)
