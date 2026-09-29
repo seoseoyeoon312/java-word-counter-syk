@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+
 //txt 읽기
 public class TxtParser implements TextParser {
     @Override

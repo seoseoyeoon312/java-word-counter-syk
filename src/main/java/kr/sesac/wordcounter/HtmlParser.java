@@ -6,6 +6,8 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,8 +18,9 @@ public class HtmlParser implements TextParser {
     @Override
     public List<String> parse(Path file) throws IOException {
         List<String> texts = new ArrayList<>();
-        Document document = Jsoup.parse(file.toFile(), "UTF-8");
-        Elements matches = document.select(SELECTOR);
+        String html = Files.readString(file, StandardCharsets.UTF_8);
+        Document doc = Jsoup.parse(html);
+        Elements matches = doc.select(SELECTOR);
         if (matches.size() != 1) {
             throw new IOException("본문 요소는 정확히 하나여야 합니다.");
         }

@@ -6,7 +6,6 @@ import java.util.List;
 public class WordRules {
 
     static final String SPLIT_PATTERN = "[^A-Za-z0-9가-힣ㄱ-ㅎㅏ-ㅣ]+";
-
     //소문자, 빈 토큰 ~ 숫자만 제외
     static List<String> toTokens(String text) {
         List<String> result = new ArrayList<>();
@@ -17,7 +16,6 @@ public class WordRules {
         }
         return result;
     }
-
     static boolean isNumberOnly(String word) {
         for (int i = 0; i < word.length(); i++) {
             char c = word.charAt(i);

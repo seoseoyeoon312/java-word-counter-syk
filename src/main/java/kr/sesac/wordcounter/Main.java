@@ -9,7 +9,6 @@ import java.util.*;
 public class Main {
     static HashMap<String, Long> freq = new HashMap<>(); //추가
     static long total = 0; //전체 단어 수 셀 변수 추가
-
     static boolean hasResult, hasSummary = false;
     static String lastPath = "";
     static long lastElapsedMs = 0;
@@ -28,7 +27,10 @@ public class Main {
                 String choice = scanner.nextLine(); //nextLine -> 엔터로 실행 가능
 
                 switch (choice) {
-                    case "0" -> {System.out.println("프로그램을 종료합니다."); running = false;}
+                    case "0" -> {
+                        System.out.println("프로그램을 종료합니다.");
+                        running = false;
+                    }
                     case "1" -> {
                         while (true) {
                             System.out.print("파일 또는 폴더 경로 > ");
@@ -42,10 +44,18 @@ public class Main {
                         System.out.println(hasResult ? "분석 완료" : "분석 실패: 모든 파일을 처리하지 못했습니다.");
                         showSummary();
                     }
-                    case "2" -> {showTop(scanner);}
-                    case "3" -> {searchWord(scanner);}
-                    case "4" -> {saveResult();}
-                    case "5" -> {showSummary();}
+                    case "2" -> {
+                        showTop(scanner);
+                    }
+                    case "3" -> {
+                        searchWord(scanner);
+                    }
+                    case "4" -> {
+                        saveResult();
+                    }
+                    case "5" -> {
+                        showSummary();
+                    }
                     default -> System.out.println("잘못된 번호입니다.");
                 }
             }
@@ -63,11 +73,14 @@ public class Main {
         if (Files.isDirectory(input)) {
             try (var stream = Files.list(input)) {
                 for (Path entry : stream.sorted().toList()) {
-                    if (!Files.isRegularFile(entry)) continue; // 하위 폴더는 건너뜀
+                    if (!Files.isRegularFile(entry)) continue; //하위 폴더는 건너뜀
                     if (isSupported(entry)) targets.add(entry);
                     else skip++;
                 }
-            }
+            } catch (IOException | UncheckedIOException e) { //폴더 목록을 못 읽으면 안내 후 재입력
+                System.out.println("폴더를 읽을 수 없습니다: " + input + " (" + e.getClass().getSimpleName() + ")");
+                return false;
+            } //강사님 피드백 추가
         } else { //파일 하나를 직접 입력한경우
             if (!isSupported(input)) {
                 System.out.println("지원하지 않는 형식입니다 (" + Parsers.supportedList() + "): " + input);
@@ -82,7 +95,13 @@ public class Main {
         }
 
         //시계 시작
-        freq.clear(); total = 0; hasResult = false; tried = 0; succeeded = 0; failed = 0; skipped = skip;
+        freq.clear();
+        total = 0;
+        hasResult = false;
+        tried = 0;
+        succeeded = 0;
+        failed = 0;
+        skipped = skip;
         lastPath = input.toString();
         long start = System.nanoTime(); //스톱워치 시작
 
