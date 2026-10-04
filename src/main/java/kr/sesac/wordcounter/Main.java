@@ -7,7 +7,7 @@ import java.nio.file.Path;
 import java.util.*;
 
 public class Main {
-    static HashMap<String, Long> freq = new HashMap<>(); //추가
+    static HashMap<String, Long> freq = new HashMap<>();
     static long total = 0; //전체 단어 수 셀 변수 추가
     static boolean hasResult, hasSummary = false;
     static String lastPath = "";
@@ -93,7 +93,6 @@ public class Main {
             System.out.println("분석할 지원 파일이 없습니다: " + input);
             return false;
         }
-
         //시계 시작
         freq.clear();
         total = 0;
@@ -105,8 +104,7 @@ public class Main {
         lastPath = input.toString();
         long start = System.nanoTime(); //스톱워치 시작
 
-        for (
-                Path file : targets) {
+        for (Path file : targets) {
             tried++;
             try {
                 mergeResult(readOneFile(file));
@@ -216,7 +214,6 @@ public class Main {
             System.out.println("조회 및 저장할 분석 결과가 없습니다.");
             return;
         }
-
         Path out = Path.of("out", "counts.tsv");
         List<Map.Entry<String, Long>> list = sortedEntries();
         try {

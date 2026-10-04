@@ -13,15 +13,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class HtmlParser implements TextParser {
-    static final String SELECTOR = "#content";   //본문 영역 (설정)
+    static final String SELECTOR = "#content";   //id가 content인 부분 찾기
 
     @Override
     public List<String> parse(Path file) throws IOException {
         List<String> texts = new ArrayList<>();
         String html = Files.readString(file, StandardCharsets.UTF_8);
-        Document doc = Jsoup.parse(html);
+        Document doc = Jsoup.parse(html); // jsoup으로 HTML 구조 만들기
         Elements matches = doc.select(SELECTOR);
-        if (matches.size() != 1) {
+        if (matches.size() != 1) { //0개나 2개 이상이면 실패
             throw new IOException("본문 요소는 정확히 하나여야 합니다.");
         }
         Element content = matches.first();

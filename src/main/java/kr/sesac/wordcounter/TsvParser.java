@@ -20,8 +20,8 @@ public class TsvParser implements TextParser {
         var format = CSVFormat.RFC4180.builder()
                 .setHeader()
                 .setSkipHeaderRecord(true)
-                .setDelimiter('\t')
-                .setQuote(null)
+                .setDelimiter('\t') //차이
+                .setQuote(null) //차이
                 .setTrim(true)
                 .get();
 

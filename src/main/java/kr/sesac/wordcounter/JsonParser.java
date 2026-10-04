@@ -39,4 +39,3 @@ public class JsonParser implements TextParser {
         return texts;
     }
 }
-

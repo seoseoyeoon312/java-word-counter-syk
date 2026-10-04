@@ -27,7 +27,7 @@ public class CsvParser implements TextParser {
         try (var reader = Files.newBufferedReader(file, StandardCharsets.UTF_8);
              CSVParser parser = format.parse(reader)) //상단 읽기 규칙 format 적용
          {
-            checkHeader(parser, COLUMNS); //43번째 줄에 있는 checkheader 불러서 헤더가 있는지 text열이 있는지 검사
+            checkHeader(parser, COLUMNS);
 
             for (CSVRecord record : parser) {
                 if (!record.isConsistent()) {
