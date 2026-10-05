@@ -1,4 +1,4 @@
-package kr.sesac.wordcounter;
+package kr.sesac.wordcounter.parser;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;

@@ -1,4 +1,4 @@
-package kr.sesac.wordcounter;
+package kr.sesac.wordcounter.parser;
 
 import java.io.IOException;
 import java.nio.file.Path;

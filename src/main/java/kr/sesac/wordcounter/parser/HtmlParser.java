@@ -1,4 +1,4 @@
-package kr.sesac.wordcounter;
+package kr.sesac.wordcounter.parser;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

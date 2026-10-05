@@ -1,4 +1,4 @@
-package kr.sesac.wordcounter;
+package kr.sesac.wordcounter.parser;
 
 import java.nio.file.Path;
 import java.util.Map;
@@ -14,7 +14,7 @@ public class Parsers {
             "json", new JsonParser() //심화
     );
 
-    static TextParser find(Path file) {
+    public static TextParser find(Path file) {
         String name = file.getFileName().toString().toLowerCase();
         int dot = name.lastIndexOf('.');
         if (dot < 0) {
@@ -25,7 +25,7 @@ public class Parsers {
     }
 
     //안내 문구용 목록: ".csv .htm .html .tsv .txt"
-    static String supportedList() {
+    public static String supportedList() {
         StringBuilder sb = new StringBuilder();
         for (String extension : new TreeSet<>(BY_EXTENSION.keySet())) {
             sb.append(".").append(extension).append(" ");
